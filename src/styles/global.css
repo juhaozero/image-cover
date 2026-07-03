@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg: #faf7f4;
+    --color-surface: #ffffff;
+    --color-accent: #e11d48;
+    --color-ink: #1c1917;
+    --radius-panel: 1rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-studio-bg font-sans text-ink antialiased;
+  }
+
+  ::selection {
+    @apply bg-accent-muted text-accent-hover;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-studio-bg;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-studio-border bg-studio-surface shadow-panel;
+  }
+
+  .panel-header {
+    @apply flex items-center justify-between border-b border-studio-border px-4 py-3;
+  }
+
+  .panel-title {
+    @apply text-xs font-semibold uppercase tracking-wider text-ink-muted;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:bg-studio-muted hover:text-ink-secondary;
+  }
+
+  .segmented {
+    @apply inline-flex rounded-xl border border-studio-border bg-studio-muted p-1;
+  }
+
+  .segmented-item {
+    @apply rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-ink-muted transition-all;
+  }
+
+  .segmented-item-active {
+    @apply bg-studio-surface text-ink shadow-sm;
+  }
+
+  .canvas-matte {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.04) 0%, transparent 60%),
+      linear-gradient(180deg, #292524 0%, #1c1917 100%);
+  }
+
+  .upload-zone {
+    @apply relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-studio-border-strong bg-studio-muted/50 transition-all duration-200;
+  }
+
+  .upload-zone:hover {
+    @apply border-accent-muted bg-accent-soft/30;
+  }
+
+  .upload-zone-active {
+    @apply border-accent bg-accent-soft scale-[1.01];
+  }
+}
