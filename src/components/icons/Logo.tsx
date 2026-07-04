@@ -5,7 +5,7 @@ type LogoProps = SVGProps<SVGSVGElement> & {
   variant?: 'brand' | 'mono' | 'mark';
 };
 
-/** SnapLayout 品牌标识 — 四格拼图 + 叠层胶片感 */
+/** Ins拼图 品牌标识 */
 export function Logo({ size = 32, variant = 'brand', className, ...props }: LogoProps) {
   if (variant === 'mark') {
     return (

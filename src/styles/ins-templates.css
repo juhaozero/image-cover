@@ -1,0 +1,661 @@
+/* ── INS 模板画布 ── */
+.ins-export-root {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ins-template {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.ins-template__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── 1. 复古拍立得 ── */
+.tpl-polaroid {
+  background: #e8e4df;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6%;
+}
+
+.tpl-polaroid__frame {
+  background: #fff;
+  width: 88%;
+  max-height: 92%;
+  padding: 5% 5% 8%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.tpl-polaroid__photo-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.tpl-polaroid__photo-wrap .ins-template__photo {
+  filter: sepia(0.2) contrast(1.1) brightness(1.05) saturate(0.85);
+}
+
+.tpl-polaroid__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.tpl-polaroid__date {
+  margin: 5% 0 0;
+  font-size: clamp(14px, 3.5cqw, 28px);
+  color: #555;
+  text-align: center;
+  transform: rotate(-2deg);
+}
+
+/* ── 2. 极简杂志风 ── */
+.tpl-magazine {
+  background: #f4f1ea;
+  padding: 8% 10%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tpl-magazine__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6%;
+  border-bottom: 1px solid #333;
+  padding-bottom: 3%;
+}
+
+.tpl-magazine__issue {
+  font-family: 'Playfair Display', 'Times New Roman', serif;
+  font-size: clamp(10px, 2cqw, 14px);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #333;
+}
+
+.tpl-magazine__page {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(9px, 1.8cqw, 12px);
+  color: #666;
+  letter-spacing: 2px;
+}
+
+.tpl-magazine__photo-wrap {
+  width: 60%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  margin-bottom: 6%;
+}
+
+.tpl-magazine__photo-wrap .ins-template__photo {
+  filter: contrast(0.95) brightness(1.05) saturate(0.8);
+}
+
+.tpl-magazine__photo-wrap--left {
+  align-self: flex-start;
+}
+
+.tpl-magazine__title {
+  font-size: clamp(11px, 2.2cqw, 18px);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #333;
+  max-width: 70%;
+  line-height: 1.6;
+}
+
+.tpl-magazine__subtitle {
+  margin-top: 3%;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(9px, 1.8cqw, 13px);
+  color: #888;
+  letter-spacing: 1px;
+}
+
+.tpl-magazine__divider {
+  width: 40%;
+  height: 1px;
+  background: #333;
+  margin-top: 6%;
+}
+
+/* ── 3. 复古 CCD ── */
+.tpl-ccd {
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5%;
+}
+
+.tpl-ccd__viewfinder {
+  position: relative;
+  width: 92%;
+  height: 88%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  outline: 1px solid rgba(0, 0, 0, 0.5);
+  outline-offset: 2px;
+}
+
+.tpl-ccd__photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.tpl-ccd__photo-wrap .ins-template__photo {
+  filter: contrast(1.3) brightness(1.15) saturate(1.1);
+}
+
+.tpl-ccd__noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+.tpl-ccd__flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.55) 0%, transparent 55%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.tpl-ccd__timestamp {
+  position: absolute;
+  bottom: 4%;
+  right: 4%;
+  font-family: 'VT323', 'Press Start 2P', monospace;
+  font-size: clamp(12px, 2.8cqw, 22px);
+  color: #ff2222;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.6);
+  letter-spacing: 1px;
+}
+
+.tpl-ccd__rec {
+  position: absolute;
+  top: 4%;
+  left: 4%;
+  font-family: 'VT323', monospace;
+  font-size: clamp(11px, 2.5cqw, 18px);
+  color: #ff2222;
+  animation: ccd-blink 1.2s step-end infinite;
+}
+
+@keyframes ccd-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── 4. Y2K 千禧风（全息拼贴） ── */
+.tpl-y2k {
+  background: #111;
+  padding: 2.5%;
+}
+
+.tpl-y2k__window {
+  width: 100%;
+  height: 100%;
+  border: 2px solid #000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.tpl-y2k__titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, #ece9d8 0%, #d4d0c8 100%);
+  border-bottom: 1px solid #808080;
+  padding: 1.2% 2%;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(6px, 1.2cqw, 10px);
+}
+
+.tpl-y2k__hearts {
+  color: #ff69b4;
+  letter-spacing: 3px;
+}
+
+.tpl-y2k__win-btns {
+  display: flex;
+  gap: 4px;
+  background: #c0c0c0;
+  border: 1px solid #808080;
+  padding: 1px 3px;
+  font-size: clamp(8px, 1.5cqw, 12px);
+  line-height: 1;
+}
+
+.tpl-y2k__body {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.tpl-y2k__holo-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      125deg,
+      rgba(255, 0, 255, 0.35) 0%,
+      rgba(0, 255, 255, 0.35) 20%,
+      rgba(255, 255, 0, 0.25) 40%,
+      rgba(255, 0, 128, 0.3) 60%,
+      rgba(0, 200, 255, 0.35) 80%,
+      rgba(200, 0, 255, 0.3) 100%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 8px,
+      rgba(255, 255, 255, 0.03) 8px,
+      rgba(255, 255, 255, 0.03) 16px
+    );
+  background-color: #c0c0c0;
+}
+
+.tpl-y2k__logo-block {
+  position: absolute;
+  top: 3%;
+  left: 4%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tpl-y2k__logo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(18px, 5cqw, 42px);
+  background: linear-gradient(180deg, #ff69b4 0%, #00bfff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 2px #000;
+  paint-order: stroke fill;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.8));
+}
+
+.tpl-y2k__millennium {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: clamp(8px, 1.8cqw, 14px);
+  letter-spacing: 4px;
+  color: #111;
+}
+
+.tpl-y2k__collage {
+  position: absolute;
+  inset: 12% 3% 14%;
+}
+
+.tpl-y2k__main {
+  position: absolute;
+  left: 8%;
+  top: 8%;
+  width: 52%;
+  height: 72%;
+  overflow: hidden;
+  border: 3px solid #fff;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  transform: rotate(-1deg);
+  z-index: 2;
+}
+
+.tpl-y2k__main .ins-template__photo {
+  filter: saturate(1.4) contrast(1.2);
+  object-position: center top;
+}
+
+.tpl-y2k__main-holo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 0, 255, 0.25) 0%,
+    rgba(0, 255, 255, 0.25) 50%,
+    rgba(255, 255, 0, 0.2) 100%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.tpl-y2k__mini {
+  position: absolute;
+  background: #fff;
+  padding: 2% 2% 8%;
+  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.25);
+  z-index: 3;
+  overflow: hidden;
+}
+
+.tpl-y2k__mini .ins-template__photo {
+  filter: saturate(1.3) contrast(1.15);
+}
+
+.tpl-y2k__mini--1 {
+  width: 22%;
+  height: 28%;
+  right: 6%;
+  top: 6%;
+  transform: rotate(8deg);
+}
+
+.tpl-y2k__mini--1 .ins-template__photo {
+  object-position: 30% 20%;
+}
+
+.tpl-y2k__mini--2 {
+  width: 20%;
+  height: 24%;
+  right: 10%;
+  bottom: 18%;
+  transform: rotate(-6deg);
+}
+
+.tpl-y2k__mini--2 .ins-template__photo {
+  object-position: 70% 40%;
+}
+
+.tpl-y2k__cd {
+  position: absolute;
+  width: clamp(28px, 7cqw, 56px);
+  height: clamp(28px, 7cqw, 56px);
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #ff0080,
+    #00ffff,
+    #ffff00,
+    #ff0080,
+    #00ffff,
+    #ffff00,
+    #ff0080
+  );
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.5), 2px 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 4;
+}
+
+.tpl-y2k__cd::after {
+  content: '';
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.tpl-y2k__cd--1 {
+  left: 2%;
+  top: 20%;
+  transform: rotate(-15deg);
+}
+
+.tpl-y2k__cd--2 {
+  right: 2%;
+  top: 38%;
+  width: clamp(22px, 5.5cqw, 44px);
+  height: clamp(22px, 5.5cqw, 44px);
+}
+
+.tpl-y2k__cd--3 {
+  left: 18%;
+  bottom: 8%;
+  width: clamp(20px, 5cqw, 40px);
+  height: clamp(20px, 5cqw, 40px);
+  transform: rotate(20deg);
+}
+
+.tpl-y2k__popup {
+  position: absolute;
+  right: 4%;
+  top: 42%;
+  width: 28%;
+  background: #ece9d8;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  z-index: 6;
+  font-family: 'Tahoma', sans-serif;
+  font-size: clamp(7px, 1.4cqw, 11px);
+}
+
+.tpl-y2k__popup-bar {
+  background: linear-gradient(180deg, #0997ff 0%, #0053e2 100%);
+  color: #fff;
+  padding: 3% 5%;
+  font-weight: bold;
+  font-size: clamp(7px, 1.3cqw, 10px);
+}
+
+.tpl-y2k__popup-body {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6% 5%;
+  color: #000;
+}
+
+.tpl-y2k__popup-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(14px, 3cqw, 22px);
+  height: clamp(14px, 3cqw, 22px);
+  background: #ffcc00;
+  border: 1px solid #000;
+  border-radius: 50%;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.tpl-y2k__popup-btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 0 5% 5%;
+}
+
+.tpl-y2k__popup-btns span {
+  background: #ece9d8;
+  border: 1px solid #808080;
+  padding: 2px 8px;
+  box-shadow: inset 1px 1px 0 #fff;
+  font-size: clamp(6px, 1.2cqw, 9px);
+}
+
+.tpl-y2k__disk {
+  position: absolute;
+  left: 4%;
+  bottom: 22%;
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(7px, 1.5cqw, 12px);
+  color: #0066cc;
+  text-shadow: 1px 1px 0 #fff;
+  z-index: 5;
+  transform: rotate(-3deg);
+}
+
+.tpl-y2k__barcode {
+  position: absolute;
+  left: 3%;
+  bottom: 3%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.tpl-y2k__barcode-lines {
+  width: clamp(60px, 14cqw, 110px);
+  height: clamp(18px, 4cqw, 32px);
+  background: repeating-linear-gradient(
+    90deg,
+    #000 0px,
+    #000 2px,
+    transparent 2px,
+    transparent 4px,
+    #000 4px,
+    #000 5px,
+    transparent 5px,
+    transparent 8px
+  );
+}
+
+.tpl-y2k__barcode span {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(6px, 1.2cqw, 9px);
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.tpl-y2k__stickers {
+  position: absolute;
+  z-index: 7;
+  font-size: clamp(12px, 2.5cqw, 20px);
+}
+
+.tpl-y2k__stickers span:first-child {
+  position: absolute;
+  top: 28%;
+  left: 42%;
+  color: #ff0066;
+  transform: rotate(12deg);
+}
+
+.tpl-y2k__stickers span:last-child {
+  position: absolute;
+  top: 18%;
+  left: 48%;
+  color: #00ccff;
+}
+
+.tpl-y2k__user-title {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(12px, 2.8cqw, 22px);
+  color: #fff;
+  -webkit-text-stroke: 1px #000;
+  paint-order: stroke fill;
+  text-shadow: 2px 2px 0 #ff00ff, -1px -1px 0 #00ffff;
+  white-space: nowrap;
+  z-index: 8;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tpl-y2k__symbols {
+  position: absolute;
+  bottom: 1.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(10px, 2cqw, 16px);
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 6px;
+  z-index: 8;
+  animation: y2k-twinkle 2.5s ease-in-out infinite;
+}
+
+@keyframes y2k-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ── 5. 韩系奶油风 ── */
+.tpl-cream {
+  background: #fffdf9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8%;
+}
+
+.tpl-cream__photo-wrap {
+  position: relative;
+  width: 78%;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.tpl-cream__photo-wrap .ins-template__photo {
+  filter: brightness(1.1) contrast(0.9) saturate(0.9) hue-rotate(-5deg);
+}
+
+.tpl-cream__softlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 220, 200, 0.45) 0%, transparent 60%),
+    radial-gradient(circle at 70% 80%, rgba(255, 240, 210, 0.35) 0%, transparent 50%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.tpl-cream__title-wrap {
+  margin-top: 6%;
+  background: rgba(198, 230, 213, 0.55);
+  padding: 2% 5%;
+  border-radius: 12px;
+}
+
+.tpl-cream__title {
+  font-size: clamp(16px, 3.5cqw, 28px);
+  color: #5a5048;
+  text-align: center;
+}
+
+.tpl-cream__subtitle-wrap {
+  margin-top: 3%;
+  background: rgba(186, 215, 240, 0.5);
+  padding: 1.5% 4%;
+  border-radius: 10px;
+}
+
+.tpl-cream__subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(11px, 2.2cqw, 16px);
+  color: #7a7068;
+  text-align: center;
+}
+
+.tpl-cream__emoji {
+  margin-top: 4%;
+  font-size: clamp(16px, 3cqw, 24px);
+  letter-spacing: 8px;
+  opacity: 0.85;
+}

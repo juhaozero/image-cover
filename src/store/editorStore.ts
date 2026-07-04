@@ -1,86 +1,59 @@
 import { create } from 'zustand';
-import { getDefaultTemplate } from '@/engine/templateEngine';
-import { mapImagesToSlots } from '@/engine/layoutEngine';
-import type { EditorImage, ImageTransform, SlotMapping, Template } from '@/types';
+import { INS_TEMPLATES, resolveCanvasSize } from '@/engine/insTemplateEngine';
+import { loadImageFromFile } from '@/engine/layoutEngine';
+import type { CanvasSize, EditorImage, InsTemplateId, OutputSizeId, PhotoFilterId, TitleFontId } from '@/types';
 
 type EditorState = {
-  images: EditorImage[];
-  template: Template;
-  mappings: SlotMapping[];
-  transforms: Record<number, ImageTransform>;
-  previewScale: number;
+  image: EditorImage | null;
+  templateId: InsTemplateId;
+  filterId: PhotoFilterId;
+  title: string;
+  fontId: TitleFontId;
+  outputSizeId: OutputSizeId;
 
-  addImages: (images: EditorImage[]) => void;
-  removeImage: (id: string) => void;
-  clearImages: () => void;
-  setTemplate: (template: Template) => void;
-  setPreviewScale: (scale: number) => void;
-  updateTransform: (slotIndex: number, transform: ImageTransform) => void;
-  replaceSlotImage: (slotIndex: number, image: EditorImage) => void;
+  setImage: (file: File) => Promise<void>;
+  clearImage: () => void;
+  setTemplateId: (id: InsTemplateId) => void;
+  setFilterId: (id: PhotoFilterId) => void;
+  setTitle: (title: string) => void;
+  setFontId: (id: TitleFontId) => void;
+  setOutputSizeId: (id: OutputSizeId) => void;
+  getCanvasSize: () => CanvasSize | null;
 };
 
-function rebuildMappings(images: EditorImage[], template: Template): SlotMapping[] {
-  return mapImagesToSlots(images, template.slots);
-}
-
 export const useEditorStore = create<EditorState>((set, get) => ({
-  images: [],
-  template: getDefaultTemplate(),
-  mappings: [],
-  transforms: {},
-  previewScale: 0.5,
+  image: null,
+  templateId: 'polaroid',
+  filterId: 'none',
+  title: '',
+  fontId: 'typewriter',
+  outputSizeId: 'instagram',
 
-  addImages: (newImages) => {
-    const images = [...get().images, ...newImages].slice(0, 20);
-    const { template } = get();
-    set({
-      images,
-      mappings: rebuildMappings(images, template),
-      transforms: {},
-    });
-  },
-
-  removeImage: (id) => {
-    const images = get().images.filter((img) => img.id !== id);
-    const { template } = get();
-    set({
-      images,
-      mappings: rebuildMappings(images, template),
-      transforms: {},
-    });
-  },
-
-  clearImages: () => {
-    set({ images: [], mappings: [], transforms: {} });
-  },
-
-  setTemplate: (template) => {
-    const { images } = get();
-    set({
-      template,
-      mappings: rebuildMappings(images, template),
-      transforms: {},
-    });
-  },
-
-  setPreviewScale: (previewScale) => set({ previewScale }),
-
-  updateTransform: (slotIndex, transform) => {
-    set((state) => ({
-      transforms: { ...state.transforms, [slotIndex]: transform },
-    }));
-  },
-
-  replaceSlotImage: (slotIndex, image) => {
-    const images = [...get().images];
-    while (images.length <= slotIndex) {
-      images.push(image);
+  setImage: async (file) => {
+    try {
+      const editorImage = await loadImageFromFile(file);
+      editorImage.file = file;
+      set({ image: editorImage, title: '' });
+    } catch {
+      /* ignore */
     }
-    images[slotIndex] = image;
-    const { template } = get();
-    set({
-      images,
-      mappings: rebuildMappings(images, template),
-    });
+  },
+
+  clearImage: () => {
+    set({ image: null, title: '' });
+  },
+
+  setTemplateId: (templateId) => set({ templateId }),
+  setFilterId: (filterId) => set({ filterId }),
+  setTitle: (title) => set({ title }),
+  setFontId: (fontId) => set({ fontId }),
+  setOutputSizeId: (outputSizeId) => set({ outputSizeId }),
+
+  getCanvasSize: () => {
+    const { image, outputSizeId } = get();
+    if (!image) return null;
+    return resolveCanvasSize(outputSizeId, image.width, image.height);
   },
 }));
+
+export { INS_TEMPLATES };

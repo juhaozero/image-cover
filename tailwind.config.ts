@@ -6,7 +6,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Playfair Display', 'Georgia', 'serif'],
       },
       colors: {
         studio: {
@@ -19,10 +19,10 @@ export default {
           'border-strong': '#D6CEC6',
         },
         accent: {
-          DEFAULT: '#E11D48',
-          hover: '#BE123C',
-          soft: '#FFF1F2',
-          muted: '#FECDD3',
+          DEFAULT: '#C45C26',
+          hover: '#A34A1E',
+          soft: '#FDF4ED',
+          muted: '#F5D5C0',
         },
         ink: {
           DEFAULT: '#1C1917',
@@ -35,10 +35,6 @@ export default {
         panel: '0 1px 3px rgba(28,25,23,0.06), 0 4px 12px rgba(28,25,23,0.04)',
         canvas: '0 8px 32px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2)',
         dock: '0 -4px 24px rgba(28,25,23,0.08)',
-      },
-      borderRadius: {
-        '2xl': '1rem',
-        '3xl': '1.25rem',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

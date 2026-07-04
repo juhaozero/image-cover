@@ -1,17 +1,12 @@
-import type { EditorImage, ImageTransform, Slot, SlotMapping } from '@/types';
+import type { EditorImage } from '@/types';
 
 const MAX_IMAGE_DIMENSION = 4096;
 
-export function mapImagesToSlots(
-  images: EditorImage[],
-  slots: Slot[],
-): SlotMapping[] {
-  return slots.map((slot, slotIndex) => ({
-    slotIndex,
-    slot,
-    image: images[slotIndex] ?? null,
-  }));
-}
+export type ImageTransform = {
+  offsetX: number;
+  offsetY: number;
+  scale: number;
+};
 
 export function computeCoverTransform(
   imageWidth: number,
@@ -95,5 +90,3 @@ function compressImage(src: string, width: number, height: number): Promise<stri
     img.src = src;
   });
 }
-
-export const MAX_IMAGES = 20;
