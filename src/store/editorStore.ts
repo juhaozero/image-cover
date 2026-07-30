@@ -3,6 +3,15 @@ import { clearFilterCache, extractColorsFromImage, pickTextColor } from '@/engin
 import { extractPhotoMeta } from '@/engine/exifEngine';
 import { INS_TEMPLATES, resolveCanvasSize } from '@/engine/insTemplateEngine';
 import { clampPhotoCrop, DEFAULT_PHOTO_CROP, loadImageFromFile } from '@/engine/layoutEngine';
+import {
+  clearShareParamFromUrl,
+  createPreset,
+  loadPresets,
+  type PresetSnapshot,
+  readShareFromLocation,
+  savePresets,
+} from '@/engine/presetEngine';
+import { DEFAULT_THEME, deriveThemeFromPalette } from '@/engine/themeEngine';
 import type {
   CanvasSize,
   ColorSwatch,
@@ -13,7 +22,9 @@ import type {
   OutputSizeId,
   PhotoCrop,
   PhotoFilterId,
+  StylePreset,
   TemplateOptions,
+  ThemeColors,
   TitleFontId,
 } from '@/types';
 
@@ -47,6 +58,9 @@ type EditorState = {
   analyzing: boolean;
   photoCrop: PhotoCrop;
   templateOptions: TemplateOptions;
+  paletteDriven: boolean;
+  themeColors: ThemeColors;
+  savedPresets: StylePreset[];
 
   setImage: (file: File) => Promise<void>;
   clearImage: () => void;
@@ -64,6 +78,12 @@ type EditorState = {
   updatePhotoCrop: (partial: Partial<PhotoCrop>) => void;
   resetPhotoCrop: () => void;
   setTemplateOptions: (partial: Partial<TemplateOptions>) => void;
+  setPaletteDriven: (enabled: boolean) => void;
+  getPresetSnapshot: () => PresetSnapshot;
+  saveCurrentPreset: (name: string) => void;
+  deletePreset: (id: string) => void;
+  applyPreset: (preset: StylePreset | PresetSnapshot) => void;
+  hydrateFromShareUrl: () => boolean;
   getCanvasSize: () => CanvasSize | null;
 };
 
@@ -75,7 +95,13 @@ const emptyEnrichment = {
   suggestedTitleColor: DEFAULT_TITLE_COLOR,
   titleColorManual: false,
   analyzing: false,
+  themeColors: { ...DEFAULT_THEME },
 };
+
+function readInitialPresets(): StylePreset[] {
+  if (typeof window === 'undefined') return [];
+  return loadPresets();
+}
 
 export const useEditorStore = create<EditorState>((set, get) => ({
   image: null,
@@ -89,6 +115,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   exportScale: 2,
   photoCrop: { ...DEFAULT_PHOTO_CROP },
   templateOptions: { ...DEFAULT_TEMPLATE_OPTIONS },
+  paletteDriven: true,
+  savedPresets: readInitialPresets(),
   ...emptyEnrichment,
 
   setImage: async (file) => {
@@ -148,6 +176,59 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setTemplateOptions: (partial) =>
     set({ templateOptions: { ...get().templateOptions, ...partial } }),
 
+  setPaletteDriven: (paletteDriven) => set({ paletteDriven }),
+
+  getPresetSnapshot: () => {
+    const s = get();
+    return {
+      templateId: s.templateId,
+      filterId: s.filterId,
+      filterIntensity: s.filterIntensity,
+      fontId: s.fontId,
+      titleColor: s.titleColor,
+      title: s.title,
+      outputSizeId: s.outputSizeId,
+      templateOptions: { ...s.templateOptions },
+      paletteDriven: s.paletteDriven,
+    };
+  },
+
+  saveCurrentPreset: (name) => {
+    const preset = createPreset(name, get().getPresetSnapshot());
+    const savedPresets = [preset, ...get().savedPresets].slice(0, 20);
+    savePresets(savedPresets);
+    set({ savedPresets });
+  },
+
+  deletePreset: (id) => {
+    const savedPresets = get().savedPresets.filter((p) => p.id !== id);
+    savePresets(savedPresets);
+    set({ savedPresets });
+  },
+
+  applyPreset: (preset) => {
+    set({
+      templateId: preset.templateId,
+      filterId: preset.filterId,
+      filterIntensity: preset.filterIntensity,
+      fontId: preset.fontId,
+      titleColor: preset.titleColor,
+      title: preset.title,
+      outputSizeId: preset.outputSizeId,
+      templateOptions: { ...DEFAULT_TEMPLATE_OPTIONS, ...preset.templateOptions },
+      paletteDriven: preset.paletteDriven,
+      titleColorManual: true,
+    });
+  },
+
+  hydrateFromShareUrl: () => {
+    const snapshot = readShareFromLocation();
+    if (!snapshot) return false;
+    get().applyPreset(snapshot);
+    clearShareParamFromUrl();
+    return true;
+  },
+
   getCanvasSize: () => {
     const { image, outputSizeId } = get();
     if (!image) return null;
@@ -169,12 +250,14 @@ async function enrichImage(
 
     if (get().image?.id !== editorImage.id) return;
 
+    const themeColors = deriveThemeFromPalette(palette);
     const suggested =
       palette.length > 0 ? pickTextColor(PAPER_BG, palette) : DEFAULT_TITLE_COLOR;
 
     const current = get();
     set({
       palette,
+      themeColors,
       photoDate: meta.dateTime,
       photoLocation: meta.location,
       suggestedTitleColor: suggested,

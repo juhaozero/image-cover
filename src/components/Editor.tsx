@@ -1,13 +1,20 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { useEditorStore } from '@/store/editorStore';
 import AppHeader from './AppHeader';
 import Uploader from './Uploader';
 import TemplateSelector from './TemplateSelector';
 import ControlPanel from './ControlPanel';
+import PresetPanel from './PresetPanel';
 import InsPreview from './InsPreview';
 import ExportDock from './ExportButton';
 
 export default function Editor() {
   const exportRef = useRef<HTMLDivElement>(null);
+  const hydrateFromShareUrl = useEditorStore((s) => s.hydrateFromShareUrl);
+
+  useEffect(() => {
+    hydrateFromShareUrl();
+  }, [hydrateFromShareUrl]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -18,6 +25,7 @@ export default function Editor() {
           <Uploader />
           <TemplateSelector />
           <ControlPanel />
+          <PresetPanel />
         </aside>
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">

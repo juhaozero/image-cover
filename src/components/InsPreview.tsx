@@ -8,7 +8,9 @@ import {
 } from '@/engine/insTemplateEngine';
 import { useCanvasSize } from '@/hooks/useCanvasSize';
 import { useEditorStore } from '@/store/editorStore';
+import { DEFAULT_THEME, themeToCssVars } from '@/engine/themeEngine';
 import type { InsTemplateId, PhotoFilterId, TemplateOptions } from '@/types';
+import type { CSSProperties } from 'react';
 
 function useFilteredImage(
   src: string | undefined,
@@ -70,6 +72,8 @@ type TemplateProps = {
   photoDate: string;
   templateOptions: TemplateOptions;
   previewScale: number;
+  themeStyle: CSSProperties;
+  paletteDriven: boolean;
 };
 
 function TitleText({
@@ -98,6 +102,8 @@ function PolaroidTemplate({
   photoDate,
   templateOptions,
   previewScale,
+  themeStyle,
+  paletteDriven,
 }: TemplateProps) {
   const pad = templateOptions.polaroidPadding;
   return (
@@ -108,7 +114,8 @@ function PolaroidTemplate({
           ['--ins-title-font' as string]: titleFont,
           ['--polaroid-pad' as string]: `${pad}%`,
           ['--polaroid-frame-pad' as string]: `${Math.max(3, pad - 1)}%`,
-        } as React.CSSProperties
+          ...(paletteDriven ? themeStyle : {}),
+        } as CSSProperties
       }
     >
       <div className="tpl-polaroid__frame">
@@ -133,9 +140,19 @@ function MagazineTemplate({
   titleColor,
   templateOptions,
   previewScale,
+  themeStyle,
+  paletteDriven,
 }: TemplateProps) {
   return (
-    <div className="ins-template tpl-magazine" style={{ ['--ins-title-font' as string]: titleFont }}>
+    <div
+      className="ins-template tpl-magazine"
+      style={
+        {
+          ['--ins-title-font' as string]: titleFont,
+          ...(paletteDriven ? themeStyle : {}),
+        } as CSSProperties
+      }
+    >
       <div className="tpl-magazine__header">
         <span className="tpl-magazine__issue">{templateOptions.magazineIssue || 'Kinfolk · Editorial'}</span>
         <span className="tpl-magazine__page">{templateOptions.magazinePage || 'No. 01'}</span>
@@ -250,9 +267,25 @@ function Y2kTemplate({ photoSrc, title, titleFont, titleColor, previewScale }: T
   );
 }
 
-function CreamTemplate({ photoSrc, title, titleFont, titleColor, previewScale }: TemplateProps) {
+function CreamTemplate({
+  photoSrc,
+  title,
+  titleFont,
+  titleColor,
+  previewScale,
+  themeStyle,
+  paletteDriven,
+}: TemplateProps) {
   return (
-    <div className="ins-template tpl-cream" style={{ ['--ins-title-font' as string]: titleFont }}>
+    <div
+      className="ins-template tpl-cream"
+      style={
+        {
+          ['--ins-title-font' as string]: titleFont,
+          ...(paletteDriven ? themeStyle : {}),
+        } as CSSProperties
+      }
+    >
       <div className="tpl-cream__photo-wrap">
         <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
         <div className="tpl-cream__softlight" aria-hidden />
@@ -269,6 +302,126 @@ function CreamTemplate({ photoSrc, title, titleFont, titleColor, previewScale }:
   );
 }
 
+function CinemaTemplate({
+  photoSrc,
+  title,
+  titleFont,
+  titleColor,
+  previewScale,
+  themeStyle,
+  paletteDriven,
+}: TemplateProps) {
+  return (
+    <div
+      className="ins-template tpl-cinema"
+      style={
+        {
+          ['--ins-title-font' as string]: titleFont,
+          ...(paletteDriven ? themeStyle : {}),
+        } as CSSProperties
+      }
+    >
+      <div className="tpl-cinema__bar tpl-cinema__bar--top" aria-hidden />
+      <div className="tpl-cinema__frame">
+        <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
+      </div>
+      <div className="tpl-cinema__bar tpl-cinema__bar--bottom">
+        {title && (
+          <TitleText className="tpl-cinema__caption" color={titleColor || '#f5f5f4'}>
+            {title}
+          </TitleText>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NoteTemplate({
+  photoSrc,
+  title,
+  titleFont,
+  titleColor,
+  photoDate,
+  previewScale,
+  themeStyle,
+  paletteDriven,
+}: TemplateProps) {
+  return (
+    <div
+      className="ins-template tpl-note"
+      style={
+        {
+          ['--ins-title-font' as string]: titleFont,
+          ...(paletteDriven ? themeStyle : {}),
+        } as CSSProperties
+      }
+    >
+      <div className="tpl-note__tape" aria-hidden />
+      <div className="tpl-note__card">
+        <div className="tpl-note__photo-wrap">
+          <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
+        </div>
+        {title && (
+          <TitleText className="tpl-note__title" color={titleColor}>
+            {title}
+          </TitleText>
+        )}
+        <p className="tpl-note__meta">{formatPolaroidDate(photoDate)}</p>
+      </div>
+      <div className="tpl-note__sticker" aria-hidden>
+        ✦
+      </div>
+    </div>
+  );
+}
+
+function FilmstripTemplate({
+  photoSrc,
+  title,
+  titleFont,
+  titleColor,
+  photoDate,
+  previewScale,
+  themeStyle,
+  paletteDriven,
+}: TemplateProps) {
+  return (
+    <div
+      className="ins-template tpl-filmstrip"
+      style={
+        {
+          ['--ins-title-font' as string]: titleFont,
+          ...(paletteDriven ? themeStyle : {}),
+        } as CSSProperties
+      }
+    >
+      <div className="tpl-filmstrip__sprocket tpl-filmstrip__sprocket--left" aria-hidden>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <span key={`l-${i}`} />
+        ))}
+      </div>
+      <div className="tpl-filmstrip__body">
+        <div className="tpl-filmstrip__photo-wrap">
+          <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
+        </div>
+        <div className="tpl-filmstrip__footer">
+          <span className="tpl-filmstrip__code">35mm · {formatCcdTimestamp(photoDate)}</span>
+          {title && (
+            <TitleText className="tpl-filmstrip__title" color={titleColor || '#e7e5e4'}>
+              {title}
+            </TitleText>
+          )}
+        </div>
+      </div>
+      <div className="tpl-filmstrip__sprocket tpl-filmstrip__sprocket--right" aria-hidden>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <span key={`r-${i}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function renderTemplate(id: InsTemplateId, props: TemplateProps) {
   switch (id) {
     case 'polaroid':
@@ -281,6 +434,12 @@ function renderTemplate(id: InsTemplateId, props: TemplateProps) {
       return <Y2kTemplate {...props} />;
     case 'cream':
       return <CreamTemplate {...props} />;
+    case 'cinema':
+      return <CinemaTemplate {...props} />;
+    case 'note':
+      return <NoteTemplate {...props} />;
+    case 'filmstrip':
+      return <FilmstripTemplate {...props} />;
     default:
       return <PolaroidTemplate {...props} />;
   }
@@ -304,12 +463,15 @@ const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props,
   const photoDate = useEditorStore((s) => s.photoDate);
   const outputSizeId = useEditorStore((s) => s.outputSizeId);
   const templateOptions = useEditorStore((s) => s.templateOptions);
+  const paletteDriven = useEditorStore((s) => s.paletteDriven);
+  const themeColors = useEditorStore((s) => s.themeColors);
 
   const canvasSize = useCanvasSize();
   const exportW = canvasSize?.width ?? 1080;
   const exportH = canvasSize?.height ?? 1350;
   const photoSrc = useFilteredImage(image?.src, filterId, filterIntensity);
   const font = getFontById(fontId);
+  const themeStyle = themeToCssVars(paletteDriven ? themeColors : DEFAULT_THEME);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -341,6 +503,8 @@ const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props,
     photoDate,
     templateOptions,
     previewScale: scale,
+    themeStyle,
+    paletteDriven,
   };
 
   return (

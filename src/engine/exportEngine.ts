@@ -51,8 +51,23 @@ export function downloadDataURL(dataUrl: string, filename: string): void {
   document.body.removeChild(link);
 }
 
-export function buildExportFilename(format: ExportFormat, scale: ExportScale): string {
+export function buildExportFilename(
+  format: ExportFormat,
+  scale: ExportScale,
+  sizeTag?: string,
+): string {
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
   const ext = format === 'png' ? 'png' : 'jpg';
-  return `ins-puzzle-${timestamp}${scale > 1 ? `@${scale}x` : ''}.${ext}`;
+  const sizePart = sizeTag ? `-${sizeTag}` : '';
+  return `ins-puzzle${sizePart}-${timestamp}${scale > 1 ? `@${scale}x` : ''}.${ext}`;
+}
+
+export function waitForPaint(ms = 80): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.setTimeout(resolve, ms);
+      });
+    });
+  });
 }

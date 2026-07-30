@@ -36,7 +36,7 @@
 
 /* ── 1. 复古拍立得 ── */
 .tpl-polaroid {
-  background: #e8e4df;
+  background: var(--tpl-bg, #e8e4df);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,7 +44,7 @@
 }
 
 .tpl-polaroid__frame {
-  background: #fff;
+  background: var(--tpl-surface, #fff);
   width: 88%;
   max-height: 92%;
   padding: var(--polaroid-frame-pad, 5%) var(--polaroid-frame-pad, 5%)
@@ -84,7 +84,7 @@
 
 /* ── 2. 极简杂志风 ── */
 .tpl-magazine {
-  background: #f4f1ea;
+  background: var(--tpl-bg, #f4f1ea);
   padding: 8% 10%;
   display: flex;
   flex-direction: column;
@@ -104,13 +104,13 @@
   font-size: clamp(10px, 2cqw, 14px);
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: #333;
+  color: var(--tpl-text, #333);
 }
 
 .tpl-magazine__page {
   font-family: 'Playfair Display', serif;
   font-size: clamp(9px, 1.8cqw, 12px);
-  color: #666;
+  color: var(--tpl-muted, #666);
   letter-spacing: 2px;
 }
 
@@ -150,7 +150,7 @@
 .tpl-magazine__divider {
   width: 40%;
   height: 1px;
-  background: #333;
+  background: var(--tpl-text, #333);
   margin-top: 6%;
 }
 
@@ -640,7 +640,7 @@
 
 /* ── 5. 韩系奶油风 ── */
 .tpl-cream {
-  background: #fffdf9;
+  background: var(--tpl-bg, #fffdf9);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -672,7 +672,7 @@
 
 .tpl-cream__title-wrap {
   margin-top: 6%;
-  background: rgba(198, 230, 213, 0.55);
+  background: var(--tpl-accent-soft, rgba(198, 230, 213, 0.55));
   padding: 2% 5%;
   border-radius: 12px;
 }
@@ -702,4 +702,174 @@
   font-size: clamp(16px, 3cqw, 24px);
   letter-spacing: 8px;
   opacity: 0.85;
+}
+
+/* ── 6. 电影宽幅 ── */
+.tpl-cinema {
+  background: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tpl-cinema__bar {
+  flex: 0 0 14%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tpl-cinema__frame {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.tpl-cinema__caption {
+  margin: 0;
+  max-width: 85%;
+  text-align: center;
+  font-size: clamp(12px, 2.6cqw, 22px);
+  letter-spacing: 2px;
+  color: #f5f5f4;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* ── 7. 手账便签 ── */
+.tpl-note {
+  background: var(--tpl-bg, #f3ebe1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 8%;
+}
+
+.tpl-note__tape {
+  position: absolute;
+  top: 7%;
+  left: 50%;
+  width: 28%;
+  height: 4%;
+  transform: translateX(-50%) rotate(-2deg);
+  background: var(--tpl-accent-soft, rgba(196, 92, 38, 0.35));
+  border: 1px solid color-mix(in srgb, var(--tpl-accent, #c45c26) 35%, transparent);
+  z-index: 2;
+  opacity: 0.9;
+}
+
+.tpl-note__card {
+  width: 78%;
+  background: var(--tpl-surface, #fffaf3);
+  padding: 5% 5% 6%;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  transform: rotate(1.5deg);
+  position: relative;
+  z-index: 1;
+}
+
+.tpl-note__photo-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #ddd;
+}
+
+.tpl-note__title {
+  margin: 5% 0 0;
+  font-size: clamp(14px, 3cqw, 24px);
+  color: var(--tpl-text, #44403c);
+  text-align: center;
+}
+
+.tpl-note__meta {
+  margin: 2% 0 0;
+  font-family: 'Caveat', cursive;
+  font-size: clamp(12px, 2.4cqw, 18px);
+  color: var(--tpl-muted, #a8a29e);
+  text-align: center;
+}
+
+.tpl-note__sticker {
+  position: absolute;
+  right: 12%;
+  bottom: 14%;
+  width: 9%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--tpl-accent, #c45c26);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(10px, 2cqw, 16px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: rotate(12deg);
+  z-index: 2;
+}
+
+/* ── 8. 胶片齿孔 ── */
+.tpl-filmstrip {
+  background: #111;
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  padding: 3% 0;
+}
+
+.tpl-filmstrip__sprocket {
+  flex: 0 0 8%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  background: #0a0a0a;
+}
+
+.tpl-filmstrip__sprocket span {
+  width: 55%;
+  aspect-ratio: 1 / 1.15;
+  border-radius: 2px;
+  background: #d6d3d1;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.tpl-filmstrip__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 1.5%;
+}
+
+.tpl-filmstrip__photo-wrap {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.tpl-filmstrip__footer {
+  flex: 0 0 auto;
+  padding: 2.5% 1%;
+  display: flex;
+  flex-direction: column;
+  gap: 1%;
+}
+
+.tpl-filmstrip__code {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(9px, 1.8cqw, 13px);
+  letter-spacing: 1px;
+  color: #a8a29e;
+}
+
+.tpl-filmstrip__title {
+  margin: 0;
+  font-size: clamp(12px, 2.4cqw, 18px);
+  color: #e7e5e4;
 }

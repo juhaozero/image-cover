@@ -47,13 +47,13 @@ function TemplateThumb({ id }: { id: InsTemplateId }) {
     return (
       <div className={`${base} bg-stone-200 p-1.5`}>
         <div className="h-[72%] bg-stone-400" />
-        <div className="mt-1 h-1 w-8 mx-auto rounded bg-stone-300" />
+        <div className="mt-1 mx-auto h-1 w-8 rounded bg-stone-300" />
       </div>
     );
   }
   if (id === 'magazine') {
     return (
-      <div className={`${base} bg-[#f4f1ea] p-1.5 flex flex-col`}>
+      <div className={`${base} flex flex-col bg-[#f4f1ea] p-1.5`}>
         <div className="mb-1 h-px w-full bg-stone-600" />
         <div className="h-[55%] w-[55%] bg-stone-400" />
       </div>
@@ -83,8 +83,46 @@ function TemplateThumb({ id }: { id: InsTemplateId }) {
       </div>
     );
   }
+  if (id === 'cinema') {
+    return (
+      <div className={`${base} flex flex-col bg-black`}>
+        <div className="h-[18%] bg-black" />
+        <div className="flex-1 bg-stone-500" />
+        <div className="h-[18%] bg-black" />
+      </div>
+    );
+  }
+  if (id === 'note') {
+    return (
+      <div className={`${base} relative flex items-center justify-center bg-[#f3ebe1] p-1.5`}>
+        <div className="h-[78%] w-[70%] rotate-1 bg-[#fffaf3] p-1 shadow-sm">
+          <div className="h-full bg-stone-400" />
+        </div>
+        <span className="absolute right-1.5 bottom-1.5 flex h-3 w-3 items-center justify-center rounded-full bg-orange-600 text-[5px] text-white">
+          ✦
+        </span>
+      </div>
+    );
+  }
+  if (id === 'filmstrip') {
+    return (
+      <div className={`${base} flex bg-neutral-900`}>
+        <div className="flex w-[12%] flex-col justify-evenly px-0.5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <span key={i} className="mx-auto block h-1.5 w-1.5 rounded-[1px] bg-stone-300" />
+          ))}
+        </div>
+        <div className="flex-1 bg-stone-500" />
+        <div className="flex w-[12%] flex-col justify-evenly px-0.5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <span key={i} className="mx-auto block h-1.5 w-1.5 rounded-[1px] bg-stone-300" />
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className={`${base} bg-[#fffdf9] p-1.5 flex items-center justify-center`}>
+    <div className={`${base} flex items-center justify-center bg-[#fffdf9] p-1.5`}>
       <div className="h-[80%] w-[70%] rounded-lg bg-stone-300" />
     </div>
   );

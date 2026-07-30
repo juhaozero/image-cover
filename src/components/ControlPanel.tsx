@@ -19,6 +19,8 @@ export default function ControlPanel() {
   const analyzing = useEditorStore((s) => s.analyzing);
   const photoCrop = useEditorStore((s) => s.photoCrop);
   const templateOptions = useEditorStore((s) => s.templateOptions);
+  const paletteDriven = useEditorStore((s) => s.paletteDriven);
+  const themeColors = useEditorStore((s) => s.themeColors);
 
   const setFilterId = useEditorStore((s) => s.setFilterId);
   const setFilterIntensity = useEditorStore((s) => s.setFilterIntensity);
@@ -30,6 +32,7 @@ export default function ControlPanel() {
   const resetPhotoCrop = useEditorStore((s) => s.resetPhotoCrop);
   const updatePhotoCrop = useEditorStore((s) => s.updatePhotoCrop);
   const setTemplateOptions = useEditorStore((s) => s.setTemplateOptions);
+  const setPaletteDriven = useEditorStore((s) => s.setPaletteDriven);
 
   if (!image) return null;
 
@@ -165,6 +168,27 @@ export default function ControlPanel() {
           </div>
           {!titleColorManual && palette.length > 0 && (
             <p className="text-[10px] text-ink-muted">已按对比度自动建议文字色，点击色块可覆盖</p>
+          )}
+          <label className="flex items-center justify-between gap-2 text-[11px] text-ink-secondary">
+            <span>色板驱动模板配色</span>
+            <input
+              type="checkbox"
+              checked={paletteDriven}
+              onChange={(e) => setPaletteDriven(e.target.checked)}
+              className="h-4 w-4 accent-[var(--color-accent)]"
+            />
+          </label>
+          {paletteDriven && palette.length > 0 && (
+            <div className="flex items-center gap-2 rounded-lg bg-studio-muted/50 px-2.5 py-2">
+              {(['background', 'accent', 'text'] as const).map((key) => (
+                <span
+                  key={key}
+                  title={key}
+                  className="h-5 flex-1 rounded border border-black/10"
+                  style={{ backgroundColor: themeColors[key] }}
+                />
+              ))}
+            </div>
           )}
         </div>
       </section>

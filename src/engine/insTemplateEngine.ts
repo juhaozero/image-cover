@@ -15,6 +15,9 @@ export const INS_TEMPLATES: InsTemplate[] = [
   { id: 'ccd', name: '复古 CCD', description: '闪光灯 · 噪点 · 时间戳' },
   { id: 'y2k', name: 'Y2K 千禧风', description: '全息拼贴 · 像素窗口' },
   { id: 'cream', name: '韩系奶油风', description: '暖白柔光 · 大圆角' },
+  { id: 'cinema', name: '电影宽幅', description: '上下黑边 · 字幕条' },
+  { id: 'note', name: '手账便签', description: '纸胶带 · 便签贴' },
+  { id: 'filmstrip', name: '胶片齿孔', description: '35mm 齿孔边框' },
 ];
 
 export const OUTPUT_SIZE_PRESETS: OutputSizePreset[] = [
