@@ -1,6 +1,16 @@
-import type { EditorImage } from '@/types';
+import type { CSSProperties } from 'react';
+import type { EditorImage, PhotoCrop } from '@/types';
 
 const MAX_IMAGE_DIMENSION = 4096;
+
+export const DEFAULT_PHOTO_CROP: PhotoCrop = {
+  zoom: 1,
+  panX: 0,
+  panY: 0,
+};
+
+export const PHOTO_ZOOM_MIN = 1;
+export const PHOTO_ZOOM_MAX = 3;
 
 export type ImageTransform = {
   offsetX: number;
@@ -8,23 +18,51 @@ export type ImageTransform = {
   scale: number;
 };
 
+export function clampPhotoCrop(crop: PhotoCrop): PhotoCrop {
+  const zoom = Math.min(PHOTO_ZOOM_MAX, Math.max(PHOTO_ZOOM_MIN, crop.zoom));
+  const maxPan = Math.max(0, (zoom - 1) / zoom);
+  return {
+    zoom,
+    panX: Math.max(-maxPan, Math.min(maxPan, crop.panX)),
+    panY: Math.max(-maxPan, Math.min(maxPan, crop.panY)),
+  };
+}
+
+/** 将相对构图转为 slot 内的 cover 像素变换（供调试 / 将来 Canvas 导出） */
 export function computeCoverTransform(
   imageWidth: number,
   imageHeight: number,
   slotWidth: number,
   slotHeight: number,
-  custom?: ImageTransform,
+  crop: PhotoCrop = DEFAULT_PHOTO_CROP,
 ): ImageTransform {
-  if (custom) return custom;
-
-  const scale = Math.max(slotWidth / imageWidth, slotHeight / imageHeight);
+  const baseScale = Math.max(slotWidth / imageWidth, slotHeight / imageHeight);
+  const scale = baseScale * crop.zoom;
   const scaledW = imageWidth * scale;
   const scaledH = imageHeight * scale;
+  const maxOffsetX = Math.max(0, (scaledW - slotWidth) / 2);
+  const maxOffsetY = Math.max(0, (scaledH - slotHeight) / 2);
 
   return {
     scale,
-    offsetX: (slotWidth - scaledW) / 2,
-    offsetY: (slotHeight - scaledH) / 2,
+    offsetX: (slotWidth - scaledW) / 2 + crop.panX * maxOffsetX * 2,
+    offsetY: (slotHeight - scaledH) / 2 + crop.panY * maxOffsetY * 2,
+  };
+}
+
+/** DOM 预览/导出用的图片样式（与 computeCoverTransform 语义一致） */
+export function photoCropStyle(crop: PhotoCrop): CSSProperties {
+  const c = clampPhotoCrop(crop);
+  const maxShift = ((c.zoom - 1) / c.zoom) * 50;
+  return {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    transform: `translate(${c.panX * maxShift * 2}%, ${c.panY * maxShift * 2}%) scale(${c.zoom})`,
+    transformOrigin: 'center center',
+    maxWidth: 'none',
   };
 }
 

@@ -68,7 +68,7 @@ export function pickTextColor(bgHex: string, palette: ColorSwatch[]): string {
   let bestContrast = 0;
 
   for (const swatch of palette) {
-    const lum = luminance(...swatch.rgb);
+    const lum = luminance(swatch.rgb[0], swatch.rgb[1], swatch.rgb[2]);
     const c = contrastRatio(bgLum, lum);
     if (c > bestContrast) {
       bestContrast = c;
@@ -167,6 +167,13 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 export type FilterMatrix = number[];
 
+const IDENTITY_MATRIX: FilterMatrix = [
+  1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0,
+];
+
+const filterResultCache = new Map<string, string>();
+const FILTER_CACHE_LIMIT = 16;
+
 export function getFilterMatrix(filterId: string): FilterMatrix | null {
   const matrices: Record<string, FilterMatrix> = {
     film: [1.05, 0.08, 0, 0, 8, 0, 1.0, 0, 0, 4, 0, 0.05, 0.85, 0, 0, 0, 0, 0, 1, 0],
@@ -179,6 +186,14 @@ export function getFilterMatrix(filterId: string): FilterMatrix | null {
     positive: [1.05, 0, 0, 0, 5, 0, 1.05, 0, 0, 5, 0, 0, 1.05, 0, 5, 0, 0, 0, 1, 0],
   };
   return matrices[filterId] ?? null;
+}
+
+/** 在 identity 与目标矩阵之间按 intensity(0–100) 插值 */
+export function interpolateFilterMatrix(target: FilterMatrix, intensity: number): FilterMatrix {
+  const t = Math.max(0, Math.min(100, intensity)) / 100;
+  if (t <= 0) return IDENTITY_MATRIX.slice();
+  if (t >= 1) return target.slice();
+  return target.map((v, i) => IDENTITY_MATRIX[i] + (v - IDENTITY_MATRIX[i]) * t);
 }
 
 function clampChannel(value: number): number {
@@ -198,14 +213,39 @@ function applyMatrixToImageData(data: Uint8ClampedArray, matrix: FilterMatrix): 
   }
 }
 
+function cacheKey(src: string, filterId: string, intensity: number, maxDimension: number): string {
+  return `${src.slice(0, 64)}|${src.length}|${filterId}|${Math.round(intensity)}|${maxDimension}`;
+}
+
+function rememberFilterResult(key: string, dataUrl: string): void {
+  if (filterResultCache.size >= FILTER_CACHE_LIMIT) {
+    const first = filterResultCache.keys().next().value;
+    if (first) filterResultCache.delete(first);
+  }
+  filterResultCache.set(key, dataUrl);
+}
+
+export function clearFilterCache(): void {
+  filterResultCache.clear();
+}
+
 export async function applyFilterToImage(
   src: string,
   filterId: string,
   maxDimension = 2048,
-): Promise<CanvasImageSource> {
+  intensity = 100,
+): Promise<CanvasImageSource | string> {
+  const baseMatrix = getFilterMatrix(filterId);
+  if (!baseMatrix || intensity <= 0) {
+    return loadImage(src);
+  }
+
+  const key = cacheKey(src, filterId, intensity, maxDimension);
+  const cached = filterResultCache.get(key);
+  if (cached) return cached;
+
   const img = await loadImage(src);
-  const matrix = getFilterMatrix(filterId);
-  if (!matrix) return img;
+  const matrix = interpolateFilterMatrix(baseMatrix, intensity);
 
   const scale = Math.min(1, maxDimension / Math.max(img.naturalWidth, img.naturalHeight));
   const width = Math.max(1, Math.round(img.naturalWidth * scale));
@@ -221,7 +261,10 @@ export async function applyFilterToImage(
   const imageData = ctx.getImageData(0, 0, width, height);
   applyMatrixToImageData(imageData.data, matrix);
   ctx.putImageData(imageData, 0, 0);
-  return canvas;
+
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  rememberFilterResult(key, dataUrl);
+  return dataUrl;
 }
 
 export function loadImageSource(src: string): Promise<HTMLImageElement> {

@@ -19,20 +19,36 @@
   display: block;
 }
 
+.ins-photo-slot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.ins-photo-slot--interactive {
+  cursor: grab;
+  touch-action: none;
+}
+
+.ins-photo-slot--interactive:active {
+  cursor: grabbing;
+}
+
 /* ── 1. 复古拍立得 ── */
 .tpl-polaroid {
   background: #e8e4df;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6%;
+  padding: var(--polaroid-pad, 6%);
 }
 
 .tpl-polaroid__frame {
   background: #fff;
   width: 88%;
   max-height: 92%;
-  padding: 5% 5% 8%;
+  padding: var(--polaroid-frame-pad, 5%) var(--polaroid-frame-pad, 5%)
+    calc(var(--polaroid-frame-pad, 5%) + 3%);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
@@ -55,6 +71,7 @@
   background: radial-gradient(circle, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
   mix-blend-mode: multiply;
   pointer-events: none;
+  z-index: 1;
 }
 
 .tpl-polaroid__date {
@@ -98,6 +115,7 @@
 }
 
 .tpl-magazine__photo-wrap {
+  position: relative;
   width: 60%;
   aspect-ratio: 4 / 5;
   overflow: hidden;
@@ -192,6 +210,23 @@
   color: #ff2222;
   text-shadow: 0 0 6px rgba(255, 0, 0, 0.6);
   letter-spacing: 1px;
+  pointer-events: none;
+}
+
+.tpl-ccd__caption {
+  position: absolute;
+  bottom: 4%;
+  left: 4%;
+  max-width: 55%;
+  font-family: 'VT323', monospace;
+  font-size: clamp(11px, 2.4cqw, 18px);
+  color: #ff2222;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.45);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
 .tpl-ccd__rec {
@@ -202,6 +237,7 @@
   font-size: clamp(11px, 2.5cqw, 18px);
   color: #ff2222;
   animation: ccd-blink 1.2s step-end infinite;
+  pointer-events: none;
 }
 
 @keyframes ccd-blink {
@@ -349,10 +385,18 @@
 .tpl-y2k__mini {
   position: absolute;
   background: #fff;
-  padding: 2% 2% 8%;
   box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.25);
   z-index: 3;
   overflow: hidden;
+}
+
+.tpl-y2k__mini .ins-photo-slot {
+  top: 6%;
+  left: 6%;
+  right: 6%;
+  bottom: 22%;
+  width: auto;
+  height: auto;
 }
 
 .tpl-y2k__mini .ins-template__photo {

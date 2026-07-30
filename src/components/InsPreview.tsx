@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
+import CroppedPhoto from '@/components/CroppedPhoto';
 import { applyFilterToImage, getFilterMatrix, loadImageSource } from '@/engine/colorEngine';
 import {
   formatCcdTimestamp,
@@ -7,10 +8,20 @@ import {
 } from '@/engine/insTemplateEngine';
 import { useCanvasSize } from '@/hooks/useCanvasSize';
 import { useEditorStore } from '@/store/editorStore';
-import type { InsTemplateId, PhotoFilterId, TitleFontId } from '@/types';
+import type { InsTemplateId, PhotoFilterId, TemplateOptions } from '@/types';
 
-function useFilteredImage(src: string | undefined, filterId: PhotoFilterId): string | undefined {
+function useFilteredImage(
+  src: string | undefined,
+  filterId: PhotoFilterId,
+  intensity: number,
+): string | undefined {
   const [displaySrc, setDisplaySrc] = useState<string | undefined>();
+  const [debouncedIntensity, setDebouncedIntensity] = useState(intensity);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebouncedIntensity(intensity), 80);
+    return () => window.clearTimeout(t);
+  }, [intensity]);
 
   useEffect(() => {
     if (!src) {
@@ -23,10 +34,12 @@ function useFilteredImage(src: string | undefined, filterId: PhotoFilterId): str
 
     const apply = async () => {
       try {
-        if (getFilterMatrix(filterId)) {
-          const result = await applyFilterToImage(src, filterId);
+        if (getFilterMatrix(filterId) && debouncedIntensity > 0) {
+          const result = await applyFilterToImage(src, filterId, 2048, debouncedIntensity);
           if (cancelled) return;
-          if (result instanceof HTMLCanvasElement) {
+          if (typeof result === 'string') {
+            setDisplaySrc(result);
+          } else if (result instanceof HTMLCanvasElement) {
             setDisplaySrc(result.toDataURL('image/jpeg', 0.92));
           } else if (result instanceof HTMLImageElement) {
             setDisplaySrc(result.src);
@@ -44,7 +57,7 @@ function useFilteredImage(src: string | undefined, filterId: PhotoFilterId): str
     return () => {
       cancelled = true;
     };
-  }, [src, filterId]);
+  }, [src, filterId, debouncedIntensity]);
 
   return displaySrc;
 }
@@ -53,64 +66,114 @@ type TemplateProps = {
   photoSrc: string;
   title: string;
   titleFont: string;
+  titleColor: string;
+  photoDate: string;
+  templateOptions: TemplateOptions;
+  previewScale: number;
 };
 
-function TitleText({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function TitleText({
+  children,
+  className = '',
+  color,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  color?: string;
+}) {
   return (
-    <p className={`ins-title-text ${className}`} style={{ fontFamily: 'var(--ins-title-font)' }}>
+    <p
+      className={`ins-title-text ${className}`}
+      style={{ fontFamily: 'var(--ins-title-font)', ...(color ? { color } : {}) }}
+    >
       {children}
     </p>
   );
 }
 
-function PolaroidTemplate({ photoSrc, title, titleFont }: TemplateProps) {
-  const dateLabel = title || formatPolaroidDate('');
+function PolaroidTemplate({
+  photoSrc,
+  titleFont,
+  titleColor,
+  photoDate,
+  templateOptions,
+  previewScale,
+}: TemplateProps) {
+  const pad = templateOptions.polaroidPadding;
   return (
-    <div className="ins-template tpl-polaroid" style={{ ['--ins-title-font' as string]: titleFont }}>
+    <div
+      className="ins-template tpl-polaroid"
+      style={
+        {
+          ['--ins-title-font' as string]: titleFont,
+          ['--polaroid-pad' as string]: `${pad}%`,
+          ['--polaroid-frame-pad' as string]: `${Math.max(3, pad - 1)}%`,
+        } as React.CSSProperties
+      }
+    >
       <div className="tpl-polaroid__frame">
         <div className="tpl-polaroid__photo-wrap">
-          <img src={photoSrc} alt="" className="ins-template__photo" crossOrigin="anonymous" />
+          <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
           <div className="tpl-polaroid__vignette" aria-hidden />
         </div>
-        <TitleText className="tpl-polaroid__date">{dateLabel}</TitleText>
+        {templateOptions.showPolaroidDate && (
+          <TitleText className="tpl-polaroid__date" color={titleColor}>
+            {formatPolaroidDate(photoDate)}
+          </TitleText>
+        )}
       </div>
     </div>
   );
 }
 
-function MagazineTemplate({ photoSrc, title, titleFont }: TemplateProps) {
+function MagazineTemplate({
+  photoSrc,
+  title,
+  titleFont,
+  titleColor,
+  templateOptions,
+  previewScale,
+}: TemplateProps) {
   return (
     <div className="ins-template tpl-magazine" style={{ ['--ins-title-font' as string]: titleFont }}>
       <div className="tpl-magazine__header">
-        <span className="tpl-magazine__issue">Kinfolk · Editorial</span>
-        <span className="tpl-magazine__page">No. 01</span>
+        <span className="tpl-magazine__issue">{templateOptions.magazineIssue || 'Kinfolk · Editorial'}</span>
+        <span className="tpl-magazine__page">{templateOptions.magazinePage || 'No. 01'}</span>
       </div>
       <div className="tpl-magazine__photo-wrap tpl-magazine__photo-wrap--left">
-        <img src={photoSrc} alt="" className="ins-template__photo" crossOrigin="anonymous" />
+        <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
       </div>
-      {title && <TitleText className="tpl-magazine__title">{title}</TitleText>}
+      {title && (
+        <TitleText className="tpl-magazine__title" color={titleColor}>
+          {title}
+        </TitleText>
+      )}
+      {templateOptions.magazineSubtitle && (
+        <p className="tpl-magazine__subtitle">{templateOptions.magazineSubtitle}</p>
+      )}
       <div className="tpl-magazine__divider" />
     </div>
   );
 }
 
-function CcdTemplate({ photoSrc }: TemplateProps) {
+function CcdTemplate({ photoSrc, title, photoDate, previewScale }: TemplateProps) {
   return (
     <div className="ins-template tpl-ccd">
       <div className="tpl-ccd__viewfinder">
         <div className="tpl-ccd__photo-wrap">
-          <img src={photoSrc} alt="" className="ins-template__photo" crossOrigin="anonymous" />
+          <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
           <div className="tpl-ccd__noise" aria-hidden />
           <div className="tpl-ccd__flash" aria-hidden />
           <span className="tpl-ccd__rec">● REC</span>
-          <span className="tpl-ccd__timestamp">{formatCcdTimestamp('')}</span>
+          {title && <span className="tpl-ccd__caption">{title}</span>}
+          <span className="tpl-ccd__timestamp">{formatCcdTimestamp(photoDate)}</span>
         </div>
       </div>
     </div>
   );
 }
 
-function Y2kTemplate({ photoSrc, title, titleFont }: TemplateProps) {
+function Y2kTemplate({ photoSrc, title, titleFont, titleColor, previewScale }: TemplateProps) {
   const displayTitle = title || 'Y2K';
   return (
     <div className="ins-template tpl-y2k" style={{ ['--ins-title-font' as string]: titleFont }}>
@@ -134,15 +197,15 @@ function Y2kTemplate({ photoSrc, title, titleFont }: TemplateProps) {
 
           <div className="tpl-y2k__collage">
             <div className="tpl-y2k__main">
-              <img src={photoSrc} alt="" className="ins-template__photo" crossOrigin="anonymous" />
+              <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
               <div className="tpl-y2k__main-holo" aria-hidden />
             </div>
 
             <div className="tpl-y2k__mini tpl-y2k__mini--1">
-              <img src={photoSrc} alt="" className="ins-template__photo" crossOrigin="anonymous" />
+              <CroppedPhoto src={photoSrc} />
             </div>
             <div className="tpl-y2k__mini tpl-y2k__mini--2">
-              <img src={photoSrc} alt="" className="ins-template__photo" crossOrigin="anonymous" />
+              <CroppedPhoto src={photoSrc} />
             </div>
 
             <div className="tpl-y2k__cd tpl-y2k__cd--1" aria-hidden />
@@ -175,7 +238,9 @@ function Y2kTemplate({ photoSrc, title, titleFont }: TemplateProps) {
           </div>
 
           {displayTitle && (
-            <TitleText className="tpl-y2k__user-title">{displayTitle}</TitleText>
+            <TitleText className="tpl-y2k__user-title" color={titleColor}>
+              {displayTitle}
+            </TitleText>
           )}
 
           <p className="tpl-y2k__symbols">✦ ✧ ✵ ♡ ✦ ✧</p>
@@ -185,16 +250,18 @@ function Y2kTemplate({ photoSrc, title, titleFont }: TemplateProps) {
   );
 }
 
-function CreamTemplate({ photoSrc, title, titleFont }: TemplateProps) {
+function CreamTemplate({ photoSrc, title, titleFont, titleColor, previewScale }: TemplateProps) {
   return (
     <div className="ins-template tpl-cream" style={{ ['--ins-title-font' as string]: titleFont }}>
       <div className="tpl-cream__photo-wrap">
-        <img src={photoSrc} alt="" className="ins-template__photo" crossOrigin="anonymous" />
+        <CroppedPhoto src={photoSrc} interactive previewScale={previewScale} />
         <div className="tpl-cream__softlight" aria-hidden />
       </div>
       {title && (
         <div className="tpl-cream__title-wrap">
-          <TitleText className="tpl-cream__title">{title}</TitleText>
+          <TitleText className="tpl-cream__title" color={titleColor}>
+            {title}
+          </TitleText>
         </div>
       )}
       <p className="tpl-cream__emoji">☁️ 🌸 ✨</p>
@@ -230,14 +297,18 @@ const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props,
   const image = useEditorStore((s) => s.image);
   const templateId = useEditorStore((s) => s.templateId);
   const filterId = useEditorStore((s) => s.filterId);
+  const filterIntensity = useEditorStore((s) => s.filterIntensity);
   const title = useEditorStore((s) => s.title);
   const fontId = useEditorStore((s) => s.fontId);
+  const titleColor = useEditorStore((s) => s.titleColor);
+  const photoDate = useEditorStore((s) => s.photoDate);
   const outputSizeId = useEditorStore((s) => s.outputSizeId);
+  const templateOptions = useEditorStore((s) => s.templateOptions);
 
   const canvasSize = useCanvasSize();
   const exportW = canvasSize?.width ?? 1080;
   const exportH = canvasSize?.height ?? 1350;
-  const photoSrc = useFilteredImage(image?.src, filterId);
+  const photoSrc = useFilteredImage(image?.src, filterId, filterIntensity);
   const font = getFontById(fontId);
 
   useEffect(() => {
@@ -266,6 +337,10 @@ const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props,
     photoSrc: photoSrc ?? '',
     title,
     titleFont: font.family,
+    titleColor,
+    photoDate,
+    templateOptions,
+    previewScale: scale,
   };
 
   return (
@@ -274,7 +349,9 @@ const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props,
         <div>
           <h2 className="text-sm font-semibold text-ink">拼图预览</h2>
           <p className="text-[11px] text-ink-muted">
-            {canvasSize ? `${exportW} × ${exportH} px` : '上传照片后开始'}
+            {canvasSize
+              ? `${exportW} × ${exportH} px · 拖拽平移 / 滚轮缩放照片`
+              : '上传照片后开始'}
           </p>
         </div>
       </div>

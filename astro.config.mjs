@@ -28,6 +28,15 @@ export default defineConfig({
       alias: {
         '@': path.resolve(root, 'src'),
       }
-    }
+    },
+     //  开发端口号
+     server: {
+      port: 5173,
+      strictPort: true,
+    },
+    preview: {
+      port: 4173,
+    },
+ 
   }
 });

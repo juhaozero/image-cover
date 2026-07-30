@@ -72,17 +72,16 @@ export function getTemplateById(id: InsTemplateId): InsTemplate {
   return INS_TEMPLATES.find((t) => t.id === id) ?? INS_TEMPLATES[0];
 }
 
-export function formatPolaroidDate(dateStr: string): string {
-  if (!dateStr) {
-    return new Date().toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
-  const normalized = dateStr.replace(/\./g, '-');
+function parsePhotoDate(dateStr: string): Date | null {
+  if (!dateStr) return null;
+  // 支持 "yyyy.mm.dd" / "yyyy.mm.dd HH:mm"
+  const normalized = dateStr.replace(/\./g, '-').replace(' ', 'T');
   const parsed = new Date(normalized);
-  if (Number.isNaN(parsed.getTime())) return dateStr;
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function formatPolaroidDate(dateStr: string): string {
+  const parsed = parsePhotoDate(dateStr) ?? new Date();
   return parsed.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -91,12 +90,7 @@ export function formatPolaroidDate(dateStr: string): string {
 }
 
 export function formatCcdTimestamp(dateStr: string): string {
-  const now = new Date();
-  let date = now;
-  if (dateStr) {
-    const parsed = new Date(dateStr.replace(/\./g, '-'));
-    if (!Number.isNaN(parsed.getTime())) date = parsed;
-  }
+  const date = parsePhotoDate(dateStr) ?? new Date();
   const hh = String(date.getHours()).padStart(2, '0');
   const mm = String(date.getMinutes()).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');

@@ -1,7 +1,7 @@
 {
   "name": "image-cover",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -14,10 +14,8 @@
     "astro": "^5.5.0",
     "exifr": "^7.1.3",
     "html-to-image": "^1.11.13",
-    "konva": "^9.3.20",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-konva": "^19.0.3",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

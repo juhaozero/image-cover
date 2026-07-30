@@ -9,7 +9,9 @@ function formatDateTime(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
-  return `${y}.${m}.${d}`;
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  return `${y}.${m}.${d} ${hh}:${mm}`;
 }
 
 async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
@@ -63,7 +65,7 @@ export async function extractPhotoMeta(file: File): Promise<PhotoMeta> {
       if (name) location = name;
     }
   } catch {
-    /* ignore */
+    /* 逆地理失败不阻塞 */
   }
 
   try {
@@ -71,15 +73,13 @@ export async function extractPhotoMeta(file: File): Promise<PhotoMeta> {
     const raw = exif?.DateTimeOriginal ?? exif?.CreateDate;
     if (raw instanceof Date) dateTime = formatDateTime(raw);
   } catch {
-    /* ignore */
+    /* EXIF 日期缺失时沿用当天 */
   }
 
   if (!location) {
     const browserLoc = await getBrowserLocation();
     if (browserLoc) location = browserLoc;
   }
-
-  if (!location) location = '地点 / 主标题';
 
   return { location, dateTime };
 }
