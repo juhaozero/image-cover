@@ -18,7 +18,8 @@ function normalizeBasePath(raw) {
   return withLeading.endsWith('/') ? withLeading : `${withLeading}/`;
 }
 
-const base = normalizeBasePath(env.BASE_PATH);
+// CI / Pages 可通过环境变量覆盖；本地默认读 .env
+const base = normalizeBasePath(process.env.BASE_PATH ?? env.BASE_PATH);
 
 export default defineConfig({
   base,
