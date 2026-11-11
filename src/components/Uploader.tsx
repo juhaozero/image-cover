@@ -1,128 +1,86 @@
+import { useRef, useState, type RefObject } from 'react';
 import { IconClose, IconPhotoAdd, IconSpinner } from '@/components/icons';
-import { useCallback, useRef, useState } from 'react';
 import { useEditorStore } from '@/store/editorStore';
 
 const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
-function isSupportedImage(file: File): boolean {
-  if (ACCEPTED_TYPES.has(file.type)) return true;
-  // 部分环境可能拿不到 MIME，按扩展名兜底
-  return /\.(jpe?g|png|webp|gif)$/i.test(file.name);
-}
-
-export default function Uploader() {
-  const inputRef = useRef<HTMLInputElement>(null);
+export default function Uploader({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> }) {
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
+  const processing = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const image = useEditorStore((s) => s.image);
   const setImage = useEditorStore((s) => s.setImage);
   const clearImage = useEditorStore((s) => s.clearImage);
 
-  const processFile = useCallback(
-    async (file: File) => {
-      setError(null);
-      if (!isSupportedImage(file)) {
-        setError('暂不支持该格式，请使用 JPG / PNG / WebP');
-        return;
-      }
-      setLoading(true);
-      try {
-        await setImage(file);
-      } catch {
-        setError('照片读取失败，请换一张图再试');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [setImage],
-  );
-
-  const onDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (file) processFile(file);
-    },
-    [processFile],
-  );
-
-  const handleClear = () => {
+  const processFile = async (file: File) => {
+    if (processing.current) return;
     setError(null);
-    clearImage();
+    if (!ACCEPTED_TYPES.has(file.type) && !/\.(jpe?g|png|webp|gif)$/i.test(file.name)) {
+      setError('暂不支持该格式，请使用 JPG、PNG、WebP 或 GIF。');
+      return;
+    }
+    processing.current = true;
+    setLoading(true);
+    try {
+      await setImage(file);
+    } catch {
+      setError('照片读取失败，请换一张再试。');
+    } finally {
+      setLoading(false);
+      processing.current = false;
+    }
   };
 
   return (
-    <section className="panel overflow-hidden">
+    <section className="panel">
       <div className="panel-header">
-        <h2 className="panel-title">上传照片</h2>
+        <h2 className="panel-title"><span className="step-number" aria-hidden="true">01</span>上传照片</h2>
+      </div>
+      <div className="px-3.5 pb-3.5">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          hidden
+          disabled={loading}
+          onChange={(e) => {
+            const file = e.currentTarget.files?.[0];
+            e.currentTarget.value = '';
+            if (file) void processFile(file);
+          }}
+        />
+        <button
+          type="button"
+          className={`upload-zone w-full ${dragging ? 'upload-zone-active' : ''}`}
+          disabled={loading}
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            const file = e.dataTransfer.files[0];
+            if (file) void processFile(file);
+          }}
+        >
+          <span className="upload-icon">
+            {loading ? <IconSpinner size={21} className="animate-spin" /> : image
+              ? <img src={image.src} alt="" className="size-full rounded-lg object-cover" />
+              : <IconPhotoAdd size={22} />}
+          </span>
+          <span className="text-sm font-semibold">{loading ? '读取照片中…' : image ? '更换照片' : '点击或拖入照片'}</span>
+          <span className="mt-1 text-xs text-ink-muted">JPG、PNG、WebP、GIF</span>
+        </button>
         {image && (
-          <button type="button" onClick={handleClear} className="btn-ghost text-red-500">
-            更换
+          <button type="button" disabled={loading} onClick={() => { clearImage(); setError(null); }} className="btn-ghost mt-2">
+            <IconClose size={14} /> 移除照片
           </button>
         )}
-      </div>
-
-      <div className="p-3">
-        {!image ? (
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => inputRef.current?.click()}
-            onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={onDrop}
-            className={['upload-zone px-4 py-8', dragging ? 'upload-zone-active' : ''].join(' ')}
-          >
-            {loading ? (
-              <div className="flex flex-col items-center gap-2">
-                <IconSpinner size={24} className="animate-spin text-accent" />
-                <p className="text-xs font-medium text-ink-secondary">读取照片中…</p>
-              </div>
-            ) : (
-              <>
-                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-accent-soft text-ink-secondary">
-                  <IconPhotoAdd size={20} />
-                </div>
-                <p className="text-sm font-semibold text-ink">点击或拖入照片</p>
-                <p className="mt-0.5 text-center text-[11px] text-ink-muted">JPG / PNG / WebP</p>
-              </>
-            )}
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) processFile(file);
-                e.target.value = '';
-              }}
-            />
-          </div>
-        ) : (
-          <div className="relative overflow-hidden rounded-xl ring-1 ring-studio-border">
-            <img src={image.src} alt="已上传" className="aspect-[3/4] w-full object-cover" />
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg bg-black/50 text-white backdrop-blur-sm"
-              aria-label="更换照片"
-            >
-              <IconClose size={14} />
-            </button>
-          </div>
-        )}
-        {error && (
-          <p className="mt-2 text-center text-[11px] text-red-500" role="alert">
-            {error}
-          </p>
-        )}
+        {error && <p className="mt-2 text-xs text-red-700" role="alert">{error}</p>}
       </div>
     </section>
   );

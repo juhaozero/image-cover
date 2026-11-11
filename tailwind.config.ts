@@ -1,54 +1,41 @@
 import type { Config } from 'tailwindcss';
 
+const rgb = (token: string) => `rgb(var(--${token}) / <alpha-value>)`;
+
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['DM Sans', 'Noto Sans SC', 'sans-serif'],
+        display: ['Playfair Display', 'Noto Serif SC', 'serif'],
+        mono: ['Space Mono', 'monospace'],
       },
       colors: {
         studio: {
-          bg: '#FAF7F4',
-          surface: '#FFFFFF',
-          muted: '#F3EFEB',
-          canvas: '#1C1917',
-          'canvas-inner': '#292524',
-          border: '#E8E2DC',
-          'border-strong': '#D6CEC6',
+          bg: rgb('studio-bg'),
+          surface: rgb('studio-surface'),
+          muted: rgb('studio-muted'),
+          border: rgb('studio-border'),
+          'border-strong': rgb('studio-border-strong'),
         },
         accent: {
-          DEFAULT: '#C45C26',
-          hover: '#A34A1E',
-          soft: '#FDF4ED',
-          muted: '#F5D5C0',
+          DEFAULT: rgb('studio-accent'),
+          hover: rgb('studio-accent-hover'),
+          soft: rgb('studio-accent-soft'),
+          muted: rgb('studio-accent-muted'),
         },
         ink: {
-          DEFAULT: '#1C1917',
-          secondary: '#57534E',
-          muted: '#A8A29E',
-          faint: '#D6D3D1',
+          DEFAULT: rgb('studio-ink'),
+          secondary: rgb('studio-ink-secondary'),
+          muted: rgb('studio-ink-muted'),
+          faint: rgb('studio-ink-faint'),
         },
       },
       boxShadow: {
-        panel: '0 1px 3px rgba(28,25,23,0.06), 0 4px 12px rgba(28,25,23,0.04)',
-        canvas: '0 8px 32px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2)',
-        dock: '0 -4px 24px rgba(28,25,23,0.08)',
-      },
-      animation: {
-        'fade-in': 'fadeIn 0.3s ease-out',
-        'slide-up': 'slideUp 0.35s ease-out',
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(8px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
+        panel: 'var(--shadow-panel)',
+        canvas: 'var(--shadow-canvas)',
+        dock: 'var(--shadow-dock)',
       },
     },
   },

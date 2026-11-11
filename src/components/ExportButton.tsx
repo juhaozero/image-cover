@@ -97,9 +97,15 @@ export default function ExportDock({ exportRef }: Props) {
 
   return (
     <footer className="sticky bottom-0 z-40 border-t border-studio-border bg-studio-surface/95 shadow-dock backdrop-blur-md">
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-          <p className="text-[11px] text-ink-muted">所有处理均在本地浏览器完成，无需上传服务器。</p>
+      <div className="studio-wrap flex flex-col gap-2.5 py-2.5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p className="hidden items-center gap-2 text-xs font-medium text-ink-secondary sm:flex">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <rect x="4" y="8.5" width="12" height="8.5" rx="2" />
+              <path d="M7 8.5V6a3 3 0 0 1 6 0v2.5M10 12v2" strokeLinecap="round" />
+            </svg>
+            照片仅在本地处理
+          </p>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-ink-muted">格式</span>
@@ -109,6 +115,7 @@ export default function ExportDock({ exportRef }: Props) {
                     key={opt.id}
                     type="button"
                     onClick={() => setExportFormat(opt.id)}
+                    aria-pressed={format === opt.id}
                     className={[
                       'rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors',
                       format === opt.id
@@ -129,6 +136,7 @@ export default function ExportDock({ exportRef }: Props) {
                     key={opt.id}
                     type="button"
                     onClick={() => setExportScale(opt.id)}
+                    aria-pressed={scale === opt.id}
                     className={[
                       'rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors',
                       scale === opt.id
@@ -144,8 +152,8 @@ export default function ExportDock({ exportRef }: Props) {
           </div>
         </div>
 
-        <div className="flex flex-col items-stretch gap-1.5 sm:items-end">
-          <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
+        <div className="flex flex-col items-stretch gap-1.5 lg:items-end">
+          <div className="flex flex-wrap items-center justify-between gap-2 lg:justify-end">
             {canExport && outputSize ? (
               <p className="text-[11px] text-ink-muted">
                 输出{' '}
@@ -157,7 +165,7 @@ export default function ExportDock({ exportRef }: Props) {
               <p className="text-[11px] text-ink-muted">上传照片后即可导出</p>
             )}
 
-            <div className="flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleBatchExport}
@@ -175,12 +183,12 @@ export default function ExportDock({ exportRef }: Props) {
               >
                 {exporting ? (
                   <>
-                    <IconSpinner size={16} className="animate-spin" />
+                    <span className="download-icon"><IconSpinner size={17} className="animate-spin" /></span>
                     导出中…
                   </>
                 ) : (
                   <>
-                    <IconDownload size={16} />
+                    <span className="download-icon"><IconDownload size={17} /></span>
                     下载拼图 {formatLabel}
                   </>
                 )}
@@ -188,7 +196,7 @@ export default function ExportDock({ exportRef }: Props) {
             </div>
           </div>
           {error && (
-            <p className="text-right text-[11px] text-red-500" role="alert">
+            <p className="text-right text-[11px] text-red-700" role="alert">
               {error}
             </p>
           )}

@@ -1,10 +1,13 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
 import CroppedPhoto from '@/components/CroppedPhoto';
+import { IconPhotoAdd } from './icons';
+import { PrintStack } from './PhotoArtwork';
 import { applyFilterToImage, getFilterMatrix, loadImageSource } from '@/engine/colorEngine';
 import {
   formatCcdTimestamp,
   formatPolaroidDate,
   getFontById,
+  getTemplateById,
 } from '@/engine/insTemplateEngine';
 import { useCanvasSize } from '@/hooks/useCanvasSize';
 import { useEditorStore } from '@/store/editorStore';
@@ -446,10 +449,10 @@ function renderTemplate(id: InsTemplateId, props: TemplateProps) {
 }
 
 type Props = {
-  previewScale?: number;
+  onPickPhoto: () => void;
 };
 
-const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props, ref) {
+const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview({ onPickPhoto }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
 
@@ -478,12 +481,12 @@ const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props,
     if (!el || !canvasSize) return;
 
     const update = () => {
-      const pad = 48;
+      const pad = el.clientWidth < 480 ? 32 : 64;
       const maxW = el.clientWidth - pad;
       const maxH = el.clientHeight - pad;
       const scaleW = maxW / exportW;
       const scaleH = maxH / exportH;
-      setScale(Math.min(scaleW, scaleH, 1));
+      setScale(Math.max(0, Math.min(scaleW, scaleH, 1)));
     };
 
     update();
@@ -508,37 +511,35 @@ const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props,
   };
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col lg:min-h-[calc(100vh-4rem)]">
-      <div className="flex items-center justify-between border-b border-studio-border px-4 py-3 lg:px-6">
-        <div>
-          <h2 className="text-sm font-semibold text-ink">拼图预览</h2>
-          <p className="text-[11px] text-ink-muted">
-            {canvasSize
-              ? `${exportW} × ${exportH} px · 拖拽平移 / 滚轮缩放照片`
-              : '上传照片后开始'}
-          </p>
+    <section className="panel preview-panel min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2" aria-labelledby="preview-heading">
+      <div className="preview-toolbar">
+        <div className="min-w-0">
+          <h2 id="preview-heading" className="panel-title">
+            <span className="step-number" aria-hidden="true">03</span>拼图预览
+          </h2>
         </div>
+        <span className="studio-label truncate rounded-md bg-studio-muted px-2.5 py-1.5">{getTemplateById(templateId).name}</span>
       </div>
 
-      <div
-        ref={containerRef}
-        className="canvas-matte relative flex flex-1 items-center justify-center p-6 sm:p-10"
-      >
+      <div ref={containerRef} className="canvas-matte">
+        <span className="canvas-corner canvas-corner-tl" aria-hidden="true" />
+        <span className="canvas-corner canvas-corner-tr" aria-hidden="true" />
+        <span className="canvas-corner canvas-corner-bl" aria-hidden="true" />
+        <span className="canvas-corner canvas-corner-br" aria-hidden="true" />
         {!image && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-3xl">
-              📷
-            </div>
-            <p className="text-sm font-medium text-white/50">上传一张照片开始</p>
-            <p className="mt-1 max-w-[220px] text-xs leading-relaxed text-white/30">
-              选择 INS 风模板，一键导出
-            </p>
+          <div className="preview-empty">
+            <PrintStack />
+            <p className="preview-empty-title">从一张照片开始</p>
+            <p className="mt-2 text-sm leading-relaxed text-ink-secondary">把日常的光影，装进喜欢的相框。</p>
+            <button type="button" className="preview-pick" onClick={onPickPhoto}>
+              <IconPhotoAdd size={17} /> 选择照片
+            </button>
           </div>
         )}
 
         {image && canvasSize && photoSrc && (
           <div
-            className="overflow-hidden shadow-canvas ring-1 ring-white/10"
+            className="relative overflow-hidden shadow-canvas ring-1 ring-studio-border"
             style={{ width: displayW, height: displayH }}
           >
             <div
@@ -560,6 +561,12 @@ const InsPreview = forwardRef<HTMLDivElement, Props>(function InsPreview(_props,
             </div>
           </div>
         )}
+      </div>
+      <div className="preview-status">
+        <span className="studio-label flex items-center gap-2"><span className="canvas-indicator" aria-hidden="true" />画布</span>
+        <span className="text-right">
+          {canvasSize ? `${exportW} × ${exportH} px · 拖拽平移 / 滚轮缩放` : '上传照片后显示预览'}
+        </span>
       </div>
     </section>
   );
