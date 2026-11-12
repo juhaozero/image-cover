@@ -22,13 +22,14 @@ function normalizeBasePath(raw) {
 const base = normalizeBasePath(process.env.BASE_PATH ?? env.BASE_PATH);
 
 export default defineConfig({
+  outDir: 'images',
   base,
   integrations: [react(), tailwind({ applyBaseStyles: false })],
   vite: {
     resolve: {
       alias: {
         '@': path.resolve(root, 'src'),
-      }
+      }, 
     },
      //  开发端口号
      server: {
